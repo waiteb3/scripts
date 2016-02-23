@@ -1,3 +1,4 @@
+### Bash
 ```bash
-ln -s $HOME/bash/aliases .bash_aliases
+ln -s $HOME/shared/bash/aliases .bash_aliases
 ```

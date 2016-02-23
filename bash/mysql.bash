@@ -3,9 +3,11 @@
 source db_helper.sh
 
 LOCAL_DB=${DB:-$(basename $(pwd))_test}
-
+RUN="docker exec mysql mysql"
+EXEC="docker exec mysql mysql -e"
 CMD="docker exec mysql mysql -proot $LOCAL_DB"
 CMDi="docker exec -i mysql mysql -proot $LOCAL_DB"
+TTY="docker exec -it mysql mysql -proot $LOCAL_DB"
 
 mysql_helper() {
 
@@ -37,7 +39,6 @@ mysql_helper() {
         docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}
         ;;
     repl)
-        docker exec -it mysql mysql -proot $LOCAL_DB
         ;;
     esac
     set +x

@@ -4,13 +4,13 @@ export PS1="\[\e[35;1m\]\u\[\e[0m\]@\[\e[32;1m\]\h\[\e[0m\]:\[\e[37m\][\w]\[\e[3
 
 alias sbt='TZ="UTC" sbt -mem 2048 -Dehcacheplugin=disabled -Dmemcachedplugin=enabled'
 
-for file in $(ls $HOME/bash); do
+for file in $(ls $HOME/shared/bash); do
     if [[ $file == "aliases.bash" ]]; then
         ## just in case its renamed aliases.bash to prevent a recursive bash sourcing
         continue
     fi
 
     if [[ "${file##*.}" == "bash" ]]; then
-        source $HOME/bash/$file
+        source $HOME/shared/bash/$file
     fi
 done
