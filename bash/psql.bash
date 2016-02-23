@@ -11,34 +11,72 @@ TTY="docker exec -it postgres psql -U postgres"
 DBDUMP="docker exec -i postgres psqldump -U postgres $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}"
 DBRESTORE="docker exec -i postgres psqlrestore -U postgres $LOCAL_DB < ${LOCAL_DB}${2:-_dump.sql}"
 
+psql_helper() {
+    LOCAL_DB=${DB:-$(basename $(pwd))_test}
+
+    if ! $CMD $LOCAL_DB -e "SELECT 1;"; then
+        echo "FAIL: DB doesn't exist"
+        kill -INT $$ # ctrl+c
+    fi
+
+    set -x
+    case $1 in
+    drop)
+        docker exec mysql mysql -proot -e "drop database $LOCAL_DB;"
+        docker exec mysql mysql -proot -e "create database $LOCAL_DB;"
+        ;;
+    reset_pwd)
+        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
+        ;;
+    apply_evolutions)
+        EVOLUTIONS="conf/evolutions/default"
+        sbt up >> /dev/null
+        for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
+            echo "$CMD < $EVOLUTIONS/$evolution"
+            $CMD < $EVOLUTIONS/$evolution
+        done
+        ;; 
+    import)
+        $CMDi < ${LOCAL_DB}${2:-_dump.sql}
+        ;;
+    save)
+        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}
+        ;;
+    repl)
+        docker exec -it mysql mysql -proot $LOCAL_DB
+        ;;
+    esac
+    set +x
+}
+
 psql_pwd() {
-    db_helper reset_pwd
+    psql_helper reset_pwd
 }
 
 psql_drop() {
-    db_helper drop
+    psql_helper drop
 }
 
 psql_import() {
-    db_helper drop
-    db_helper import $1
-    db_helper reset_pwd
+    psql_helper drop
+    psql_helper import $1
+    psql_helper reset_pwd
 }
 
 psql_save() {
-    db_helper save "_${1:-_dump}.sql"
+    psql_helper save "_${1:-_dump}.sql"
 }
 
 psql_reset() {
-    db_helper drop
-    db_helper apply_evolutions
-    db_helper reset_pwd
+    psql_helper drop
+    psql_helper apply_evolutions
+    psql_helper reset_pwd
 }
 
 psql_repl() {
-    db_helper repl
+    psql_helper repl
 }
 
 psql_version() {
-    db_helper version
+    psql_helper version
 }

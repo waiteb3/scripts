@@ -1,36 +1,35 @@
 #!/bin/bash
 
-source db_helper.sh
-
-LOCAL_DB=${DB:-$(basename $(pwd))_test}
-RUN="docker exec mysql mysql"
-EXEC="docker exec mysql mysql -e"
-CMD="docker exec mysql mysql -proot $LOCAL_DB"
-CMDi="docker exec -i mysql mysql -proot $LOCAL_DB"
-TTY="docker exec -it mysql mysql -proot $LOCAL_DB"
-
 mysql_helper() {
+    LOCAL_DB=${DB:-$(basename $(pwd))_test}
 
-    if ! $CMDi -e "SELECT 1"; then
+    RUN="docker exec mysql mysql -proot"
+    CMD="docker exec mysql mysql -proot $LOCAL_DB"
+    CMDi="docker exec -i mysql mysql -proot $LOCAL_DB"
+
+    if ! $CMD -e "SELECT 1;"; then
         kill -INT $$ # ctrl+c
     fi
 
     set -x
     case $1 in
     drop)
-        docker exec mysql mysql -proot -e "drop database $LOCAL_DB;"
-        docker exec mysql mysql -proot -e "create database $LOCAL_DB;"
+        $RUN -e "drop database $LOCAL_DB;"
+        $RUN -e "create database $LOCAL_DB;"
         ;;
     reset_pwd)
         $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
         ;;
     apply_evolutions)
+        $RUN -e "drop database $LOCAL_DB;"
+        $RUN -e "create database $LOCAL_DB;"
         EVOLUTIONS="conf/evolutions/default"
         sbt up >> /dev/null
-        for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
-            echo "$CMD < $EVOLUTIONS/$evolution"
-            $CMD < $EVOLUTIONS/$evolution
-        done
+        # for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
+        #     echo "$CMDi < $EVOLUTIONS/$evolution"
+        #     $CMDi < $EVOLUTIONS/$evolution
+        # done
+        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
         ;; 
     import)
         $CMDi < ${LOCAL_DB}${2:-_dump.sql}
@@ -39,6 +38,7 @@ mysql_helper() {
         docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}
         ;;
     repl)
+        docker exec -it mysql mysql -proot $LOCAL_DB
         ;;
     esac
     set +x
@@ -66,6 +66,12 @@ mysql_reset() {
     mysql_helper drop
     mysql_helper apply_evolutions
     mysql_helper reset_pwd
+}
+
+mysql_fetch_dev() {
+    mysql_helper drop
+    mysql_helper reset_pwd
+    mysql_helper save _dev.sql
 }
 
 mysql_repl() {
