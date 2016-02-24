@@ -1,0 +1,1 @@
+window.input = new Input({});
