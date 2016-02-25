@@ -1,0 +1,1 @@
+docker run -d --net=host --restart always --name mysql -e MYSQL_ROOT_PASSWORD=root -v $HOME/mysql-data:/var/lib/mysql mysql:5.6
