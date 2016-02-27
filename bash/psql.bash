@@ -1,49 +1,55 @@
 #!/bin/bash
 
-LOCAL_DB=${DB:-$(basename $(pwd))_test}
-
-RUN="docker exec postgres psql"
-EXEC="docker exec postgres psql -U postgres -c"
-CMD="docker exec postgres psql -U postgres $LOCAL_DB"
-CMDi="docker exec -i postgres psql -U postgres $LOCAL_DB"
-TTY="docker exec -it postgres psql -U postgres"
-# TODO fix
-DBDUMP="docker exec -i postgres psqldump -U postgres $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}"
-DBRESTORE="docker exec -i postgres psqlrestore -U postgres $LOCAL_DB < ${LOCAL_DB}${2:-_dump.sql}"
-
 psql_helper() {
     LOCAL_DB=${DB:-$(basename $(pwd))_test}
 
-    if ! $CMD $LOCAL_DB -e "SELECT 1;"; then
+    RUN="docker exec postgres psql -U postgres"
+    CMD="$RUN $LOCAL_DB"
+    CMDi="docker exec -i postgres psql -U postgres $LOCAL_DB"
+
+    if ! $CMD -c "SELECT 1;" >> /dev/null; then
         echo "FAIL: DB doesn't exist"
         kill -INT $$ # ctrl+c
     fi
 
+    _drop() {
+        $RUN -c "DROP DATABASE $LOCAL_DB;"
+        $RUN -c "CREATE DATABASE $LOCAL_DB;"
+    }
+    _pwd() {
+        PWD='$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy'
+        $CMD -c "UPDATE users SET password = '$PWD';"
+    }
+
     set -x
     case $1 in
+    version)
+        docker exec postgres psql --version
+        ;;
     drop)
-        docker exec mysql mysql -proot -e "drop database $LOCAL_DB;"
-        docker exec mysql mysql -proot -e "create database $LOCAL_DB;"
+        _drop
         ;;
     reset_pwd)
-        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
+        _pwd
         ;;
     apply_evolutions)
+        _drop
         EVOLUTIONS="conf/evolutions/default"
         sbt up >> /dev/null
-        for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
-            echo "$CMD < $EVOLUTIONS/$evolution"
-            $CMD < $EVOLUTIONS/$evolution
-        done
+        #for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
+        #    echo "$CMD < $EVOLUTIONS/$evolution"
+        #    $CMD < $EVOLUTIONS/$evolution
+        #done
+        _pwd
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}${2:-_dump.sql}
+        $CMDi < ${LOCAL_DB}_${2:-dump.sql}
         ;;
     save)
-        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}
+        docker exec -i postgres pg_dump -U postgres $LOCAL_DB > ${LOCAL_DB}_${2:-dump.sql}
         ;;
     repl)
-        docker exec -it mysql mysql -proot $LOCAL_DB
+        docker exec -it postgres psql -U postgres $LOCAL_DB
         ;;
     esac
     set +x
@@ -64,7 +70,7 @@ psql_import() {
 }
 
 psql_save() {
-    psql_helper save "_${1:-_dump}.sql"
+    psql_helper save $1
 }
 
 psql_reset() {
