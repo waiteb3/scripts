@@ -11,31 +11,38 @@ mysql_helper() {
         kill -INT $$ # ctrl+c
     fi
 
+    _drop() {
+        $RUN -e "drop database $LOCAL_DB;"
+        $RUN -e "create database $LOCAL_DB;"
+    }
+
+    _pwd() {
+        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
+    }
+
     set -x
     case $1 in
     drop)
-        $RUN -e "drop database $LOCAL_DB;"
-        $RUN -e "create database $LOCAL_DB;"
+        _drop
         ;;
     reset_pwd)
-        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
+        _pwd
         ;;
     apply_evolutions)
-        $RUN -e "drop database $LOCAL_DB;"
-        $RUN -e "create database $LOCAL_DB;"
+        _drop
         EVOLUTIONS="conf/evolutions/default"
         sbt up >> /dev/null
         # for evolution in $(ls --color=never $EVOLUTIONS | sort -g); do
         #     echo "$CMDi < $EVOLUTIONS/$evolution"
         #     $CMDi < $EVOLUTIONS/$evolution
         # done
-        $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
+        _pwd
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}_${2:-dump.sql}
+        $CMDi < ${LOCAL_DB}_${2:-dump}.sql
         ;;
     save)
-        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}_${2:-dump.sql}
+        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}_${2:-dump}.sql
         ;;
     repl)
         docker exec -it mysql mysql -proot $LOCAL_DB
@@ -71,7 +78,7 @@ mysql_reset() {
 mysql_fetch_dev() {
     mysql_helper drop
     mysql_helper reset_pwd
-    mysql_helper save _dev.sql
+    mysql_helper save dev
 }
 
 mysql_repl() {

@@ -2,7 +2,7 @@
 
 git_update() {
     if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
-        echo "Use \`git pull --rebase upstream master"
+        echo "Use \`git pull --rebase upstream master\`"
     else
         git pull upstream master
         git push origin master

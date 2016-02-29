@@ -43,10 +43,10 @@ psql_helper() {
         _pwd
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}_${2:-dump.sql}
+        $CMDi < ${LOCAL_DB}_${2:-dump}.sql
         ;;
     save)
-        docker exec -i postgres pg_dump -U postgres $LOCAL_DB > ${LOCAL_DB}_${2:-dump.sql}
+        docker exec -i postgres pg_dump -U postgres $LOCAL_DB > ${LOCAL_DB}_${2:-dump}.sql
         ;;
     repl)
         docker exec -it postgres psql -U postgres $LOCAL_DB
