@@ -1,0 +1,24 @@
+<configuration>
+    
+    <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+    
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- <pattern>%coloredLevel %logger{15} - %message%n%xException{5}</pattern> -->
+            <pattern>%coloredLevel - %message%n%xException{5}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.jolbox.bonecp" level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="play" level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="application" level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+</configuration>
