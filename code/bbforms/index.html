@@ -1,0 +1,44 @@
+<body></body>
+
+<script src="underscore.js"></script>
+<script src="jquery.js"></script>
+<script src="backbone.js"></script>
+
+<script src="Form.js"></script>
+<script src="Input.js"></script>
+<script src="Rules.js"></script>
+<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+
+<script>
+    var model = new (Backbone.Model.extend({
+        defaults: {
+            firstName: "First",
+            lastName: "Last",
+            email: "noone@jaroop.com",
+            birthday: new Date(Date.UTC(1990, 0, 1, 0, 0, 0)),
+            phone: "5555555555",
+            alarm: new Date(Date.UTC(0, 0, 0, 7, 30, 0)),
+            nights: 1
+        },
+
+        initialize: function(options) {
+            this.set("fullName", this.get("firstName") + " " + this.get("lastName"));
+        }
+
+    }))();
+
+    var form = new Form({
+        model: model,
+        header: _.template('<%= fullName %>'),
+        fields: [
+            { title: "Email", property: "email", type: Email, rules: [ Required() ] },
+            { title: "Birthday", property: "email", type: DateTime, rules: [ Required() ] },
+            { title: "Phone", property: "phone", type: Phone, rules: [ Required() ] },
+            { title: "Alarm", property: "alarm", type: Time, rules: [ Required() ] },
+            { title: "Nights total", property: "nights", type: Numeric, rules: [ Required(), GreaterThan(2, true) ] }
+        ]
+    });
+
+    $("body").append(form.render().el);
+
+</script>
