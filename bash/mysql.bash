@@ -32,10 +32,10 @@ mysql_helper() {
         $CMD -e 'update users set password="$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy";'
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}${2:-_dump.sql}
+        $CMDi < ${LOCAL_DB}_${2:-dump.sql}
         ;;
     save)
-        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}${2:-_dump.sql}
+        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}_${2:-dump.sql}
         ;;
     repl)
         docker exec -it mysql mysql -proot $LOCAL_DB
@@ -59,7 +59,7 @@ mysql_import() {
 }
 
 mysql_save() {
-    mysql_helper save "_${1:-dump}.sql"
+    mysql_helper save $1
 }
 
 mysql_reset() {
