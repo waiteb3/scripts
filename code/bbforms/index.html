@@ -1,12 +1,14 @@
+<!DOCTYPE html>
+<html>
 <body></body>
 
 <script src="underscore.js"></script>
 <script src="jquery.js"></script>
 <script src="backbone.js"></script>
 
-<script src="Form.js"></script>
 <script src="Input.js"></script>
 <script src="Rules.js"></script>
+<script src="Form.js"></script>
 <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
 
 <script>
@@ -27,15 +29,41 @@
 
     }))();
 
-    var form = new Form({
+    var MyButton = Backbone.View.extend({
+        events: {
+            "click a": "action"
+        },
+
+        position: top,
+
+        action: function() { console.log(arguments); },
+
+        render: function() {
+            this.$el.html("<a>alert!</a>");
+            return this;
+        }
+    });
+
+    var form = new Backbone.Form({
         model: model,
         header: _.template('<%= fullName %>'),
-        fields: [
-            { title: "Email", property: "email", type: Email, rules: [ Required() ] },
-            { title: "Birthday", property: "email", type: DateTime, rules: [ Required() ] },
-            { title: "Phone", property: "phone", type: Phone, rules: [ Required() ] },
-            { title: "Alarm", property: "alarm", type: Time, rules: [ Required() ] },
-            { title: "Nights total", property: "nights", type: Numeric, rules: [ Required(), GreaterThan(2, true) ] }
+        // fields: [
+        //     { title: "Email", property: "email", type: Email, rules: [ Required() ] },
+        //     { title: "Birthday", property: "email", type: DateTime, rules: [ Required() ] },
+        //     { title: "Phone", property: "phone", type: Phone, rules: [ Required() ] },
+        //     { title: "Alarm", property: "alarm", type: Time, rules: [ Required() ] },
+        //     { title: "Nights total", property: "nights", type: Numeric, rules: [ Required(), GreaterThan(2, true) ] }
+        // ],
+        // fields and overrides are exclusive for now
+        required: ["firstName", "lastName"],
+        overrides: {
+            "email": { title: "Email Address", type: Email, rules: [ Required() ] },
+            "alarm": { type: Time }
+        },
+        buttons: [
+            "save",
+            { type: "cancel", action: function() { return; } },
+            new MyButton()
         ]
     });
 

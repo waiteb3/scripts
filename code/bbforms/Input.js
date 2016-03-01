@@ -50,7 +50,7 @@ var SimpleInput = Backbone.View.extend({
 
     template: _.template('<label><%= title %></label>'),
 
-    className: "form-group",
+    className: "form-group col-sm-3",
 
     initialize: function(options) {
         _.bindAll(this, "onInputBlur");
@@ -65,7 +65,9 @@ var SimpleInput = Backbone.View.extend({
     fieldInitialize: function() { },
 
     onInputBlur: function() {
-        this.model.set(this.options.property, this.input.getValue());
+        if (this.validate()) {
+            this.model.set(this.options.property, this.input.getValue());
+        }
     },
 
     render: function() {
@@ -122,4 +124,30 @@ var Numeric = SimpleInput.extend({
         console.log("Numeric");
     }
 
+});
+
+var Save = Backbone.View.extend({
+    tagName: "button",
+    className: "btn btn-primary",
+    events: { "click": "action" },
+    initialize: function(options) {
+        _.bindAll(this, "action");
+        this.options = options || {};
+        this.action = this.options.action || this.action;
+    },
+    action: function() { alert("Saved!"); },
+    render: function() { this.$el.text("Save"); this.$el.prop("type", "button"); return this; }
+});
+
+var Cancel = Backbone.View.extend({
+    tagName: "button",
+    className: "btn btn-secondary",
+    events: { "click": "action" },
+    initialize: function(options) {
+        _.bindAll(this, "action");
+        this.options = options || {};
+        this.action = this.options.action || this.action;
+    },
+    action: function() { alert("Cancel!"); },
+    render: function() { this.$el.text("Cancel"); this.$el.prop("type", "button"); return this; }
 });
