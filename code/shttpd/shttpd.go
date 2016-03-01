@@ -8,7 +8,7 @@ import (
 
 
 func main() {
-    var ADDR = flag.String("-addr", ":8080", "address")
+    var ADDR = flag.String("-addr", ":3000", "address")
     var DIR = flag.String("-dir", ".", "directory")
     flag.Parse()
 
