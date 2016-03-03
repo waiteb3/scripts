@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# INSTALL:
+# chmod +x pre-push
+# mv -i pre-push .git/hooks/pre-push
+
+warning=false
+
+LINTS="TODO
+console.log
+describe.only
+it.only
+debugger"
+
+for lint in $LINTS; do
+    HASH=$(git log --merges -n 1 --format=%h)
+    MATCHES=$(git diff --stat --cached --name-only $HASH | xargs grep --color=always -n "$lint")
+    if [[ $MATCHES != "" ]]; then
+        echo -e "\e[33;1mWARN\e[0m: You have included a file containing a '\e[31;1m$lint\e[0m' in your push"
+        printf "${MATCHES}\n"
+        echo
+        warning=true
+    fi
+done
+
+if $warning; then
+    exec < /dev/tty
+    echo -en "\e[34;1m[PRE-PUSH]\e[0m Continue push? (\e[31;1my\e[0m/\e[32;2;1mN\e[0m): "
+    read REPLY
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Not accepting push"
+        exit 1
+    fi
+fi
