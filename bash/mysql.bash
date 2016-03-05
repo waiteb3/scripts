@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mysql_helper() {
-    LOCAL_DB=${DB:-$(basename $(pwd))_test}
+    LOCAL_DB=$(get_local_play_db)
 
     RUN="docker exec mysql mysql -proot"
     CMD="docker exec mysql mysql -proot $LOCAL_DB"

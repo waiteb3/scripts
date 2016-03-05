@@ -1,7 +1,7 @@
 #!/bin/bash
 
 psql_helper() {
-    LOCAL_DB=${DB:-$(basename $(pwd))_test}
+    LOCAL_DB=$(get_local_play_db)
 
     RUN="docker exec postgres psql -U postgres"
     CMD="$RUN $LOCAL_DB"

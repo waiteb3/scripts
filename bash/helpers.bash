@@ -1,5 +1,12 @@
+get_local_play_db() {
+    echo $(sed -n 's|^db\.default\.url="jdbc\:[a-z]\+\://localhost/\(.*\)?.*|\1|p' conf/application.conf)
+}
+
+get_local_folder_db() {
+    echo $(basename $(pwd))
+}
+
 compare_dbs() {
-    LOCAL_DB=$(basename $(pwd))
     VALUES=${1:-$(docker exec mysql mysql -proot ${LOCAL_DB}_test -e "show tables;" 2> /dev/null | sed '1d')}
     for table in $VALUES; do
         echo
