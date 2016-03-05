@@ -1,3 +1,18 @@
+compare_dbs() {
+    LOCAL_DB=$(basename $(pwd))
+    VALUES=${1:-$(docker exec mysql mysql -proot ${LOCAL_DB}_test -e "show tables;" 2> /dev/null | sed '1d')}
+    for table in $VALUES; do
+        echo
+        echo "-------------------------      $table     ------------------------------"
+        echo
+        docker exec mysql mysql -proot ${LOCAL_DB}_test -e "SHOW CREATE TABLE $table \G" 2> /dev/null
+        echo
+        docker exec postgres psql -U postgres ${LOCAL_DB}_test -c "\d $table"
+        echo "------------------------------------------------------------------------"
+        echo
+    done
+}
+
 ring_alarm() {
     for i in {1..10}; do
         echo -en "\a"
