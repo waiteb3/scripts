@@ -5,7 +5,7 @@ Plug 'flazz/vim-colorschemes'
 
 Plug 'editorconfig/editorconfig-vim'
 Plug 'airblade/vim-gitgutter'
-Plug 'scrooloose/syntastic'
+" Plug 'scrooloose/syntastic'
 
 call plug#end()
 

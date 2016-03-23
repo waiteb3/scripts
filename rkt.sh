@@ -1,1 +1,3 @@
-sudo ./rkt --insecure-options=image --dir=/home/bwaite/bin/rkt/data run --interactive docker://ubuntu --exec=bash
+IMG=$1
+shift
+sudo ./rkt --insecure-options=image --dir=$HOME/rkt/data run --interactive docker://$IMG --exec="$@"
