@@ -50,3 +50,45 @@ rainbow() {
     for color in {40..47}; do print_color $color; done
 }
 
+do_locked() {
+   if [ -v $1 ]; then
+       echo "Needs a file to use as the lock as the first argument (written to /tmp)"
+       return 1
+   fi
+
+   file="/tmp/$1"
+   shift
+
+   if [[ $@ == "" ]]; then
+       echo "Needs a command to be run when unlocked as second argument"
+   fi
+
+   touch $file
+
+   eval "$@"
+
+   rm $file
+}
+
+wait_locked() {
+   if [ -v $1 ]; then
+       echo "Needs a lock file to wait on as first argument (relative to /tmp)"
+       return 1
+   fi
+
+   file="/tmp/$1"
+   shift
+
+   if [[ $@ == "" ]]; then
+       echo "Needs a command to be run when unlocked as second argument"
+   fi
+
+   echo -n "Waiting on '$file'..."
+   while [ -f $file ]; do
+       sleep 2
+       echo -n "."
+   done
+   echo
+
+   eval $@
+}
