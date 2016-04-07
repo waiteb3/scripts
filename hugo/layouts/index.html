@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ .Site.Title }}</title>
+</head>
+<body>
+    <div>
+        <h5>Group</h5>
+        {{ range .Site.Sections.group }}
+            <p>{{ .Page.Content }}</p>
+        {{ end }}
+        <h5>Parent</h5>
+        {{ range .Site.Taxonomies.children.child }}
+            <p>{{ .Page.Content }}</p>
+        {{ end }}
+    </div>
+</body>
+</html>
