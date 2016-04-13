@@ -1,19 +1,19 @@
 #!/bin/bash
 
 mysql_helper() {
-    LOCAL_DB=$(get_local_play_db)
-
-    RUN="docker exec mysql mysql -proot"
-    CMD="docker exec mysql mysql -proot $LOCAL_DB"
-    CMDi="docker exec -i mysql mysql -proot $LOCAL_DB"
+    RUN=$(get_db_command mysql mysql -proot)
+    CMD=$(get_db_command mysql mysql "-proot $(get_local_db)")
+    CMDi=$(get_db_command mysql mysql "-proot $(get_local_db)" -i)
+    DUMP=$(get_db_command mysql mysqldump "-proot $(get_local_db)" -i)
+    REPL=$(get_db_command mysql mysql "-proot $(get_local_db)" -it)
 
     if ! $CMD -e "SELECT 1;"; then
         kill -INT $$ # ctrl+c
     fi
 
     _drop() {
-        $RUN -e "drop database $LOCAL_DB;"
-        $RUN -e "create database $LOCAL_DB;"
+        $RUN -e "drop database $(get_local_db);"
+        $RUN -e "create database $(get_local_db);"
     }
 
     _pwd() {
@@ -22,6 +22,9 @@ mysql_helper() {
 
     set -x
     case $1 in
+    version)
+        $RUN -e "SELECT VERSION();"
+        ;;
     drop)
         _drop
         ;;
@@ -39,16 +42,24 @@ mysql_helper() {
         _pwd
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}_${2:-dump}.sql
+        $CMDi < $(get_local_db)_${2:-dump}.sql
         ;;
     save)
-        docker exec -i mysql mysqldump -proot $LOCAL_DB > ${LOCAL_DB}_${2:-dump}.sql
+        $DUMP > $(get_local_db)_${2:-dump}.sql
         ;;
     repl)
-        docker exec -it mysql mysql -proot $LOCAL_DB
+        $REPL
         ;;
     esac
     set +x
+}
+
+mysql_version() {
+    mysql_helper version
+}
+
+mysql_repl() {
+    mysql_helper repl
 }
 
 mysql_pwd() {
@@ -79,8 +90,4 @@ mysql_fetch_dev() {
     mysql_helper drop
     mysql_helper reset_pwd
     mysql_helper save dev
-}
-
-mysql_repl() {
-    mysql_helper repl
 }

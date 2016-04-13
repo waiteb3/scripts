@@ -1,3 +1,35 @@
+has_db_in_docker() {
+    DB=$1
+    if docker > /dev/null; then
+        if docker ps --format="{{ .Image }} {{ .Names }}" | grep -i $DB > /dev/null; then
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+get_db_command() {
+    DB=$1
+    CMD=$2
+    ARGS=$3
+    FLAGS=$4
+    if has_db_in_docker $1; then
+        CONTAINER=$(docker ps --format="{{ .Image }} {{ .Names }}" | grep -i $DB | awk '{print $2}')
+        echo "docker exec $FLAGS $CONTAINER $CMD $ARGS"
+    else
+        echo "$CMD $ARGS"
+    fi
+}
+
+get_local_db() {
+    if grep -E "addSbtPlugin.+\"com\.typesafe\.play\"" project/plugins.sbt 2> /dev/null > /dev/null; then
+        get_local_play_db
+    else
+        get_local_folder_db
+    fi
+}
+
 get_local_play_db() {
     echo $(sed -n 's|^db\.default\.url="jdbc\:[a-z]\+\://localhost/\(.*\)?.*|\1|p' conf/application.conf)
 }
@@ -7,16 +39,25 @@ get_local_folder_db() {
 }
 
 compare_dbs() {
-    VALUES=${1:-$(docker exec mysql mysql -proot ${LOCAL_DB}_test -e "show tables;" 2> /dev/null | sed '1d')}
-    for table in $VALUES; do
+    LOCAL_DB=$(get_local_play_db)
+    TABLES=${1:-$(docker exec mysql mysql -proot ${LOCAL_DB} -e "show tables;" 2> /dev/null | sed '1d')}
+    for table in $TABLES; do
         echo
         echo "-------------------------      $table     ------------------------------"
         echo
-        docker exec mysql mysql -proot ${LOCAL_DB}_test -e "SHOW CREATE TABLE $table \G" 2> /dev/null
+        docker exec mysql mysql -proot ${LOCAL_DB} -e "SHOW CREATE TABLE $table \G" 2> /dev/null
         echo
-        docker exec postgres psql -U postgres ${LOCAL_DB}_test -c "\d $table"
+        docker exec postgres psql -U postgres ${LOCAL_DB} -c "\d $table"
         echo "------------------------------------------------------------------------"
         echo
+    done
+}
+
+table_sizes() {
+    LOCAL_DB=$(get_local_play_db)
+    TABLES=${1:-$(docker exec mysql mysql -proot ${LOCAL_DB} -e "show tables;" 2> /dev/null | sed '1d')}
+    for table in $TABLES; do
+        echo "$table size: " $(docker exec mysql mysql -proot ${LOCAL_DB} -e "SELECT count(*) FROM $table;" 2> /dev/null)
     done
 }
 

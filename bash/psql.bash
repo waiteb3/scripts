@@ -1,11 +1,11 @@
 #!/bin/bash
 
 psql_helper() {
-    LOCAL_DB=$(get_local_play_db)
-
-    RUN="docker exec postgres psql -U postgres"
-    CMD="$RUN $LOCAL_DB"
-    CMDi="docker exec -i postgres psql -U postgres $LOCAL_DB"
+    RUN=$(get_db_command postgres psql "-U postgres")
+    CMD=$(get_db_command postgres psql "-U postgres $(get_local_db)")
+    CMDi=$(get_db_command postgres psql "-U postgres $(get_local_db)" -i)
+    DUMP=$(get_db_command postgres pg_dump "-U postgres $(get_local_db)" -i)
+    REPL=$(get_db_command postgres psql "-U postgres $(get_local_db)" -it)
 
     if ! $CMD -c "SELECT 1;" >> /dev/null; then
         echo "FAIL: DB doesn't exist"
@@ -24,7 +24,7 @@ psql_helper() {
     set -x
     case $1 in
     version)
-        docker exec postgres psql --version
+        $RUN -c "SELECT VERSION();"
         ;;
     drop)
         _drop
@@ -43,13 +43,13 @@ psql_helper() {
         _pwd
         ;; 
     import)
-        $CMDi < ${LOCAL_DB}_${2:-dump}.sql
+        $CMDi < $(get_local_db)_${2:-dump}.sql
         ;;
     save)
-        docker exec -i postgres pg_dump -U postgres $LOCAL_DB > ${LOCAL_DB}_${2:-dump}.sql
+        $DUMP > $(get_local_db)_${2:-dump}.sql
         ;;
     repl)
-        docker exec -it postgres psql -U postgres $LOCAL_DB
+        $REPL
         ;;
     esac
     set +x
