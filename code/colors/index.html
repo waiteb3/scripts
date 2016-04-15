@@ -1,0 +1,64 @@
+<head>
+<style>
+.body {
+    font-size: 0;
+    border: 2px solid black;
+    border-radius: .25rem;
+}
+div {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+.primary {
+    background: hsl(220, 80%, 60%);
+    width: 200px;
+    height: 200px;
+}
+.secondary {
+    background: hsl(130, 60%, 80%);
+    width: 200px;
+    height: 200px;
+}
+.darkest {
+    background: hsl(220, 20%, 20%);
+    width: 20px;
+    height: 200px;
+    padding: 0;
+    margin: 0;
+}
+.darker {
+    background: hsl(220, 40%, 40%);
+    width: 100px;
+    height: 200px;
+}
+.lighter {
+    background: hsl(220, 90%, 90%);
+    width: 20px;
+    height: 200px;
+}
+.lightest {
+    background: hsl(220, 95%, 98%);
+    width: 100px;
+    height: 200px;
+}
+.gradient {
+    display:block;
+    background: linear-gradient(90deg, hsl(220, 20%, 20%), hsl(220, 40%, 40%));
+    width: 640px;
+    height: 200px;
+}
+</style>
+</head>
+
+<body>
+    <div class="body">
+        <div class="darkest"></div>
+        <div class="darker"></div>
+        <div class="primary"></div>
+        <div class="secondary"></div>
+        <div class="lighter"></div>
+        <div class="lightest"></div>
+        <div class="gradient"></div>
+    </div>
+</body>
