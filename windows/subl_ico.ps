@@ -1,0 +1,4 @@
+$webclient = New-Object System.Net.WebClient
+$url = "https://sublimetext.com/favicon.ico"
+$saveTo = "C:\Program Files\Sublime Text 3\subl.ico"
+$webclient.DownloadFile($url, $saveTo)
