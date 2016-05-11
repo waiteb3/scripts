@@ -62,11 +62,17 @@ table_sizes() {
 }
 
 ring_alarm() {
-    for i in {1..10}; do
+    _ring() {
         echo -en "\a"
         sleep .1
         echo -en "\a"
+    }
+
+    END=${1:-10}
+    _ring
+    for i in $(seq 2 $END); do
         sleep 1
+        _ring
     done
 }
 
@@ -132,4 +138,25 @@ wait_locked() {
    echo
 
    eval $@
+}
+
+concat_dir_into_single_file() {
+    DIR=$1
+    PATTERN=$2
+    for file in $(find $DIR -name $PATTERN); do
+        echo "--->>$file<<---"
+        cat $file
+        echo
+    done
+}
+
+rebuild_concat_file_to_dir() {
+    FILE=$1
+    # FILE_NAMES=$( sed -n 's,\-\-\->>\(\S\+\)<<\-\-\-,\1,p' $FILE )
+    for line_num in $(grep -En "\-\-\->>(\S+)<<\-\-\-" $FILE | cut -d':' -f1); do
+        file_name=$(tail -n+$line_num $FILE | head -n 1)
+        file_name=${file_name#"--->>"}
+        file_name=${file_name%"<<---"}
+        echo $file_name
+    done
 }

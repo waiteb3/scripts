@@ -5,7 +5,10 @@ Plug 'flazz/vim-colorschemes'
 
 Plug 'editorconfig/editorconfig-vim'
 Plug 'airblade/vim-gitgutter'
+
 " Plug 'scrooloose/syntastic'
+" Plug 'fatih/vim-go'
+" Plug 'Valloric/YouCompleteMe'
 
 call plug#end()
 
