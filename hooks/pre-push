@@ -14,7 +14,11 @@ debugger"
 
 for lint in $LINTS; do
     HASH=$(git log --merges -n 1 --format=%h)
-    MATCHES=$(git diff -U0 $HASH HEAD | grep -E "^\+" | grep --color=always -n "$lint")
+    FILES=$(git diff-index --cached -S $lint --name-only $HASH)
+    MATCHES=""
+    if [[ $FILES != "" ]]; then
+        MATCHES=$(git grep -n $lint $FILES | grep --color=always $lint)
+    fi
     if [[ $MATCHES != "" ]]; then
         echo -e "\e[33;1mWARN\e[0m: You have included a file containing a '\e[31;1m$lint\e[0m' in your push"
         printf "${MATCHES}\n"
