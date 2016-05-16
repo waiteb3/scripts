@@ -36,7 +36,7 @@ type Command struct {
 	Args []string
 	Line int
 	Text string
-	Asm  string
+	Asm  string // TODO this should probably not be part of Command
 	Err  error
 }
 
@@ -82,13 +82,28 @@ func getCommandType(cmd string) (Type, error) {
 	return NAC, errors.New("Cannot determin command type for '" + cmd + "'")
 }
 
+// TODO rename
 type Register struct {
 	Name  string
 	Value int
 }
 
-func (r *Register) Repr() (asm string) {
+func (r Register) Repr() (asm string) {
 	asm += fmt.Sprintf("@%-20s // = %d\n", r.Name, r.Value)
+	return asm
+}
+
+func (r Register) SaveFrom(register string) (asm string) {
+	asm += r.Repr()
+	asm += "A=A-1" + NL
+	asm += "M=" + register + NL
+	return asm
+}
+
+func (r Register) LoadTo(register string) (asm string) {
+	asm += r.Repr()
+	asm += "A=A-1" + NL
+	asm += register + "=M" + NL
 	return asm
 }
 
@@ -113,6 +128,37 @@ func (r *Register) Dec() (asm string) {
 
 var StackPointer = &Register{"SP", 256}
 
+type Segment struct {
+	Name string
+}
+
+func (s Segment) Offset(index int) (asm string) {
+	asm += "@" + s.Name + NL
+	// TODO can skip zero?
+	if index >= 0 {
+		asm += "A=+" + strconv.Itoa(index) + NL
+	} else {
+		asm += "A=" + strconv.Itoa(index) + NL
+	}
+	return asm
+}
+
+// Push the value at segment[index] onto the stack
+func (s Segment) Push(index int) (asm string) {
+	asm += s.Offset(index)
+	asm += "D=M" + NL
+	asm += StackPointer.SaveFrom("D")
+	return asm
+}
+
+// Pop the value off the stack and save into segment[index]
+func (s Segment) Pop(index int) (asm string) {
+	asm += StackPointer.LoadTo("D")
+	asm += s.Offset(index)
+	asm += "M=D" + NL
+	return asm
+}
+
 const NL = "\n"
 
 func writePush(c *Command) (asm string) {
@@ -123,6 +169,12 @@ func writePush(c *Command) (asm string) {
 	asm += "A=M" + NL
 	asm += "M=D" + NL
 	asm += StackPointer.Inc()
+	return asm
+}
+
+func writePop(c *Command) (asm string) {
+	// if c.Arg[0] == P_CONSTANT
+	// TODO segments
 	return asm
 }
 
@@ -239,6 +291,8 @@ func main() {
 		switch c.Type {
 		case C_PUSH:
 			c.Asm = writePush(c)
+		case C_POP:
+			c.Asm = writePop(c)
 		case C_ARITHMETIC:
 			c.Asm = writeArithmetic(c)
 		}
