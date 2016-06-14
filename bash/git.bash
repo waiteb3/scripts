@@ -22,6 +22,22 @@ git_check_diverge() {
     git checkout --quiet master
 }
 
+git_remove_branch_non_diverged() {
+    if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
+        echo "Will not run git_check_diverge on a branch other than master"
+    fi
+    DELETE=""
+    for branch in $(git branch | grep -v master); do
+        git checkout --quiet $branch
+        if git status --untracked-files=no | grep -q -i "diverge"; then
+            echo $branch "not being removed"
+        else
+            DELETE="$DELETE $branch"
+        fi
+    done
+    git checkout --quiet master
+}
+
 git_show_stash_list() {
     DELETE=""
     for ref in $(git stash list | cut -d: -f1); do
