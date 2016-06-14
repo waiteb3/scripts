@@ -1,0 +1,38 @@
+{
+    "manifest_version": 2,
+
+    "name": "blocky",
+    "version": "1.0",
+
+    "description": "blocks imgs",
+
+    "browser_action": {
+        "default_icon": "icon.png",
+        "default_title": "blocky",
+        "default_popup": "blocky.html"
+    },
+
+    "author": "bobby",
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "js": [ "killimgs.js" ],
+            "run_at": "document_end",
+            "all_frames": true
+        }
+    ],
+    "permissions": [
+        "contextMenus",
+        "privacy",
+        "storage",
+        "tabs",
+        "unlimitedStorage",
+        "webNavigation",
+        "webRequest",
+        "webRequestBlocking",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "short_name": "blocky"
+}
+
