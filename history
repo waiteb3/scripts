@@ -1,0 +1,1 @@
+docker create --name mysql --net=host --restart always -v $HOME/tmp:/home/tmp:ro -v /home/bwaite/data/mysql:/var/lib/mysql -e TERM=xterm mysql:5.6

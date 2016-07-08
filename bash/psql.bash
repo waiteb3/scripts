@@ -1,11 +1,27 @@
 #!/bin/bash
 
 psql_helper() {
-    RUN=$(get_db_command postgres psql "-U postgres")
-    CMD=$(get_db_command postgres psql "-U postgres $(get_local_db)")
-    CMDi=$(get_db_command postgres psql "-U postgres $(get_local_db)" -i)
-    DUMP=$(get_db_command postgres pg_dump "-U postgres $(get_local_db)" -i)
-    REPL=$(get_db_command postgres psql "-U postgres $(get_local_db)" -it)
+    ARG=$1
+
+    get_db_command() {
+        CMD=$1
+        shift
+        USER=$1
+        shift
+        # PASS=$1
+        # shift
+        echo "$CMD -h localhost -U $USER $@"
+    }
+
+    set -- $(get_local_db_config)
+    DB=$1
+    USER=$2
+    PASS=$3
+    unset $1 $2 $3
+
+    RUN=$( get_db_command psql $USER )
+    CMD=$( get_db_command psql $USER $DB )
+    DUMP=$( get_db_command pg_dump $USER $DB )
 
     if ! $CMD -c "SELECT 1;" >> /dev/null; then
         echo "FAIL: DB doesn't exist"
@@ -20,9 +36,12 @@ psql_helper() {
         PWD='$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy'
         $CMD -c "UPDATE users SET password = '$PWD';"
     }
+    _run() {
+        $CMD -c "$@"
+    }
 
     set -x
-    case $1 in
+    case $ARG in
     version)
         $RUN -c "SELECT VERSION();"
         ;;
@@ -43,13 +62,17 @@ psql_helper() {
         _pwd
         ;; 
     import)
-        $CMDi < $(get_local_db)_${2:-dump}.sql
+        $CMD < $(get_local_db)_${2:-dump}.sql
         ;;
     save)
         $DUMP > $(get_local_db)_${2:-dump}.sql
         ;;
+    run)
+        shift
+        _run "$@"
+        ;;
     repl)
-        $REPL
+        $CMD
         ;;
     esac
     set +x

@@ -16,6 +16,5 @@ set t_Co=256
 set backspace=2
 colorscheme flatlandia
 nmap <space> :
-set tabstop=4
+set tabstop=4 expandtab
 set shiftwidth=4
-set expandtab

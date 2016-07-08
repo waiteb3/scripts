@@ -1,13 +1,30 @@
 #!/bin/bash
 
 mysql_helper() {
-    RUN=$(get_db_command mysql mysql -proot)
-    CMD=$(get_db_command mysql mysql "-proot $(get_local_db)")
-    CMDi=$(get_db_command mysql mysql "-proot $(get_local_db)" -i)
-    DUMP=$(get_db_command mysql mysqldump "-proot $(get_local_db)" -i)
-    REPL=$(get_db_command mysql mysql "-proot $(get_local_db)" -it)
+    ARG=$1
+
+    get_db_command() {
+        CMD=$1
+        shift
+        USER=$1
+        shift
+        PASS=$1
+        shift
+        echo "$CMD -h localhost --protocol tcp -u $USER -p$PASS $@"
+    }
+
+    set -- $(get_local_db_config)
+    DB=$1
+    USER=$2
+    PASS=$3
+    unset $1 $2 $3
+
+    RUN=$( get_db_command mysql $USER $PASS )
+    CMD=$( get_db_command mysql $USER $PASS $DB )
+    DUMP=$( get_db_command mysqldump $USER $PASS $DB )
 
     if ! $CMD -e "SELECT 1;"; then
+        echo "FAIL: DB doesn't exist"
         kill -INT $$ # ctrl+c
     fi
 
@@ -21,7 +38,7 @@ mysql_helper() {
     }
 
     set -x
-    case $1 in
+    case $ARG in
     version)
         $RUN -e "SELECT VERSION();"
         ;;
@@ -42,13 +59,13 @@ mysql_helper() {
         _pwd
         ;; 
     import)
-        $CMDi < $(get_local_db)_${2:-dump}.sql
+        $CMD < $(get_local_db)_${2:-dump}.sql
         ;;
     save)
         $DUMP > $(get_local_db)_${2:-dump}.sql
         ;;
     repl)
-        $REPL
+        $CMD
         ;;
     esac
     set +x
