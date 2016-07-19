@@ -15,7 +15,7 @@ get_local_rails_db_config() {
 }
 
 get_local_play_db_config() {
-    echo $(sed -n 's|^db\.default\.url="jdbc\:[a-z]\+\://localhost/\([_a-zA-Z]\+\)?*.*|\1|p' conf/application.conf)
+    echo $(sed -n 's|^db\.default\.url="jdbc\:[a-z]\+\://localhost/\([_a-zA-Z0-9]\+\)?*.*|\1|p' conf/application.conf)
     echo $(sed -n 's|^db\.default\.user\(name\)*="*\([^"]*\)"*|\2|p' conf/application.conf)
     echo $(sed -n 's|^db\.default\.password="*\([^"]*\)"*|\1|p' conf/application.conf)
 }

@@ -19,7 +19,8 @@ psql_helper() {
     PASS=$3
     unset $1 $2 $3
 
-    RUN=$( get_db_command psql $USER )
+    # use the postgres default database to run commands
+    RUN=$( get_db_command psql postgres postgres )
     CMD=$( get_db_command psql $USER $DB )
     DUMP=$( get_db_command pg_dump $USER $DB )
 
@@ -29,8 +30,8 @@ psql_helper() {
     fi
 
     _drop() {
-        $RUN -c "DROP DATABASE $LOCAL_DB;"
-        $RUN -c "CREATE DATABASE $LOCAL_DB;"
+        $RUN -c "DROP DATABASE $DB;"
+        $RUN -c "CREATE DATABASE $DB;"
     }
     _pwd() {
         PWD='$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy'

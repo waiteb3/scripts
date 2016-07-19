@@ -23,14 +23,14 @@ mysql_helper() {
     CMD=$( get_db_command mysql $USER $PASS $DB )
     DUMP=$( get_db_command mysqldump $USER $PASS $DB )
 
-    if ! $CMD -e "SELECT 1;"; then
+    if ! $CMD -e "SELECT 1;" >> /dev/null; then
         echo "FAIL: DB doesn't exist"
         kill -INT $$ # ctrl+c
     fi
 
     _drop() {
-        $RUN -e "drop database $(get_local_db);"
-        $RUN -e "create database $(get_local_db);"
+        $RUN -e "drop database $DB;"
+        $RUN -e "create database $DB;"
     }
 
     _pwd() {
@@ -59,10 +59,10 @@ mysql_helper() {
         _pwd
         ;; 
     import)
-        $CMD < $(get_local_db)_${2:-dump}.sql
+        $CMD < ${DB}_${2:-dump}.sql
         ;;
     save)
-        $DUMP > $(get_local_db)_${2:-dump}.sql
+        $DUMP > ${DB}_${2:-dump}.sql
         ;;
     repl)
         $CMD
