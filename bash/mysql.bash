@@ -2,6 +2,7 @@
 
 mysql_helper() {
     ARG=$1
+    TARGET=$2
 
     get_db_command() {
         CMD=$1
@@ -59,10 +60,10 @@ mysql_helper() {
         _pwd
         ;; 
     import)
-        $CMD < ${DB}_${2:-dump}.sql
+        $CMD < ${DB}_${TARGET:-dump}.sql
         ;;
     save)
-        $DUMP > ${DB}_${2:-dump}.sql
+        $DUMP > ${DB}_${TARGET:-dump}.sql
         ;;
     repl)
         $CMD

@@ -2,6 +2,7 @@
 
 psql_helper() {
     ARG=$1
+    TARGET=$2
 
     get_db_command() {
         CMD=$1
@@ -34,8 +35,8 @@ psql_helper() {
         $RUN -c "CREATE DATABASE $DB;"
     }
     _pwd() {
-        PWD='$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy'
-        $CMD -c "UPDATE users SET password = '$PWD';"
+        PASS='$2a$10$oZrZHDLFU3nVpLdiZomYtu1OHSDJ8ILFp8fwKiM5iMBrPchbTUgHy'
+        $CMD -c "UPDATE users SET password = '$PASS';"
     }
     _run() {
         $CMD -c "$@"
@@ -63,10 +64,10 @@ psql_helper() {
         _pwd
         ;; 
     import)
-        $CMD < $(get_local_db)_${2:-dump}.sql
+        $CMD < $(get_local_db)_${TARGET:-dump}.sql
         ;;
     save)
-        $DUMP > $(get_local_db)_${2:-dump}.sql
+        $DUMP > $(get_local_db)_${TARGET:-dump}.sql
         ;;
     run)
         shift
