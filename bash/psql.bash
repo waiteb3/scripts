@@ -64,10 +64,10 @@ psql_helper() {
         _pwd
         ;; 
     import)
-        $CMD < $(get_local_db)_${TARGET:-dump}.sql
+        $CMD < ${DB}_${TARGET:-dump}.sql
         ;;
     save)
-        $DUMP > $(get_local_db)_${TARGET:-dump}.sql
+        $DUMP > ${DB}_${TARGET:-dump}.sql
         ;;
     run)
         shift
