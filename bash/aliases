@@ -4,7 +4,7 @@ export PS1="\[\e[35;1m\]\u\[\e[0m\]@\[\e[32;1m\]\h\[\e[0m\]:\[\e[37m\][\w]\[\e[3
 
 _sbt() {
     LOCAL="conf/env/local.conf"
-    SBT_FLAGS="-mem 2048 -Dehcacheplugin=disabled -Dmemcachedplugin=enabled -Dauth.sessionTimeout=604800"
+    FLAGS="-mem 2048 -Dehcacheplugin=disabled -Dmemcachedplugin=enabled -Dauth.sessionTimeout=604800"
 
     if [[ -e $LOCAL ]]; then
         FLAGS="-Dconfig.file=$LOCAL $FLAGS"
