@@ -3,16 +3,19 @@
 git_update() {
     if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
         echo "Use \`git pull --rebase upstream master\`"
-    else
-        git pull upstream master
-        git push origin master
+        return 0
     fi
+
+    git pull upstream master
+    git push origin master
 }
 
 git_check_diverge() {
     if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
         echo "Will not run git_check_diverge on a branch other than master"
+        return 0
     fi
+
     for branch in $(git branch | grep -v master); do
         git checkout --quiet $branch
         if git status --untracked-files=no | grep -q -i "diverge"; then
@@ -25,7 +28,9 @@ git_check_diverge() {
 git_remove_branch_non_diverged() {
     if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
         echo "Will not run git_check_diverge on a branch other than master"
+        return 0
     fi
+
     DELETE=""
     for branch in $(git branch | grep -v master); do
         git checkout --quiet $branch
