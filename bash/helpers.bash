@@ -20,7 +20,7 @@ get_local_play_db_config() {
     echo $(sed -n 's|^db\.default\.password="*\([^"]*\)"*|\1|p' conf/application.conf)
 }
 
-get_local_folder_db() {
+get_local_folder_db_config() {
     echo $(basename $(pwd))
     echo $USER
     echo ""
