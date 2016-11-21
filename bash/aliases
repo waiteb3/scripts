@@ -1,6 +1,10 @@
 #!/bin/bash
 
-export PS1="\[\e[35;1m\]\u\[\e[0m\]@\[\e[32;1m\]\h\[\e[0m\]:\[\e[37m\][\w]\[\e[35;1m\]\n\[\e[31;1m\]\$ \[\e[0m\]"
+if [ $(uname -s) == "Darwin" ]; then
+    export PS1="\[\e[35;1m\]\u\[\e[0m\]@\[\e[32;1m\]\h\[\e[0m\]:\[\e[30m\][\w]\[\e[35;1m\]\n\[\e[31;1m\]\$ \[\e[0m\]"
+else
+    export PS1="\[\e[35;1m\]\u\[\e[0m\]@\[\e[32;1m\]\h\[\e[0m\]:\[\e[37m\][\w]\[\e[35;1m\]\n\[\e[31;1m\]\$ \[\e[0m\]"
+fi
 
 _sbt() {
     LOCAL="conf/env/local.conf"
@@ -29,7 +33,11 @@ sbt_notz() {
 export ANDROID_HOME=$HOME/Android/Sdk
 
 npm_bin() {
-    export PATH=`npm bin`:$PATH
+    if [ -f node_modules ]; then
+        export PATH=`npm bin`:$PATH
+    else
+        echo 'No node_modules path to set'
+    fi
 }
 
 for file in $(ls $HOME/shared/bash); do
