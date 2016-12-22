@@ -1,5 +1,18 @@
 #!/bin/bash
 
+git_workspace_state() {
+    for folder in $(ls); do
+        if [ -d $folder/.git ]; then
+            (
+                cd $folder
+                STATUS=$(git status --short --branch --ignored)
+                printf "%-20s %s\n" "$folder" "$(git status | head -n 1 | cut -d' ' -f3)"
+                echo $STATUS
+            )
+        fi
+    done
+}
+
 git_update() {
     if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
         echo "Use \`git pull --rebase upstream master\`"
@@ -47,8 +60,8 @@ git_show_stash_list() {
     DELETE=""
     for ref in $(git stash list | cut -d: -f1); do
         git show $ref
-        echo "Drop ref $ref (d) or Continue (enter) or quit (q): "
-        read OPTION
+        read -p "Drop ref $ref (d) or Continue (enter) or quit (q): " -n 1 OPTION
+        echo
         if [[ $OPTION == "d" || $OPTION == "D" ]]; then
             DELETE="$ref $DELETE"
         elif [[ $OPTION == "q" || $OPTION == "Q" ]]; then
