@@ -59,7 +59,8 @@ git_remove_branch_non_diverged() {
 git_show_stash_list() {
     DELETE=""
     for ref in $(git stash list | cut -d: -f1); do
-        git show $ref
+    # always use page even if less than one page
+        GIT_PAGER="less -+F" git show $ref
         read -p "Drop ref $ref (d) or Continue (enter) or quit (q): " -n 1 OPTION
         echo
         if [[ $OPTION == "d" || $OPTION == "D" ]]; then
